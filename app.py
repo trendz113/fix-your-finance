@@ -8,6 +8,10 @@ path for people whose problem ISN'T a structured "list your loans" case
 (insurance, tax, retirement, property, fraud, savings, agriculture,
 salary, guarantor liability -- see general_triage.py).
 
+v3: added a third path -- "life" mode -- a full monthly-money picture
+(income, fixed + variable expenses, credit card behaviour, insurance
+gaps, investing) rather than just debts. See life_engine.py.
+
 ENV VARS REQUIRED (set these in Railway):
   RAZORPAY_KEY_ID
   RAZORPAY_KEY_SECRET
@@ -40,6 +44,12 @@ from flask_cors import CORS
 
 from debt_engine import run_full_analysis, free_preview
 from general_triage import classify_domain, free_preview_for_text, build_general_prompt, STANDARD_DISCLAIMER
+from life_engine import (
+    analyze_life,
+    free_preview_life,
+    build_life_narration_prompt,
+    LIFE_DISCLAIMER,
+)
 
 app = Flask(__name__)
 ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
@@ -179,6 +189,11 @@ def call_claude_general_report(situation_text: str, domain: str) -> str:
     return call_claude(prompt, max_tokens=550)
 
 
+def call_claude_life_narration(analysis: dict) -> str:
+    prompt = build_life_narration_prompt(analysis)
+    return call_claude(prompt, max_tokens=700)
+
+
 def _extract_debts_and_income():
     body = request.get_json(force=True, silent=True) or {}
     debts = body.get("debts", [])
@@ -200,6 +215,20 @@ def _extract_situation_text():
     return text, None
 
 
+def _extract_life_profile():
+    """`life_profile` is a single nested object from the frontend covering
+    income, expenses, credit card behaviour, insurance and investing --
+    see life_engine.py for the exact shape and defaults it expects."""
+    body = request.get_json(force=True, silent=True) or {}
+    profile = body.get("life_profile")
+    if not isinstance(profile, dict):
+        return None, ("Life profile data is missing or malformed", 400)
+    monthly_income = float(profile.get("monthly_income", 0) or 0)
+    if monthly_income <= 0:
+        return None, ("Monthly income must be greater than zero", 400)
+    return profile, None
+
+
 # ---------------------------------------------------------------------------
 # routes
 # ---------------------------------------------------------------------------
@@ -211,13 +240,22 @@ def health():
 
 @app.route("/api/preview", methods=["POST"])
 def preview():
-    """Free tier. Two modes, based on what's in the request body:
+    """Free tier. Three modes, based on what's in the request body:
+      - `life_profile` present -> full monthly money picture (deterministic,
+        no AI call).
       - `debts` + `monthly_income` present -> structured debt verdict
         (deterministic, no AI call).
       - `situation_text` present instead -> local keyword-based domain
         classification only (no AI call -- the AI is never called before
-        payment is verified, in either mode)."""
+        payment is verified, in any mode)."""
     body = request.get_json(force=True, silent=True) or {}
+
+    if "life_profile" in body:
+        profile, err = _extract_life_profile()
+        if err:
+            msg, code = err
+            return jsonify({"error": msg}), code
+        return jsonify(free_preview_life(profile))
 
     if "situation_text" in body and not body.get("debts"):
         text, err = _extract_situation_text()
@@ -265,13 +303,14 @@ def create_order():
 def verify_payment():
     """
     Expects razorpay_order_id, razorpay_payment_id, razorpay_signature,
-    plus EITHER:
-      - debts: [...], monthly_income: number   (structured debt case), OR
-      - situation_text: string                  (anything else)
+    plus ONE of:
+      - life_profile: {...}                      (full money picture), OR
+      - debts: [...], monthly_income: number      (structured debt case), OR
+      - situation_text: string                    (anything else)
 
     Only after signature verification passes do we run the engine and
     call Claude for the report. Never calls the AI before payment is
-    verified, in either mode.
+    verified, in any mode.
     """
     body = request.get_json(force=True, silent=True) or {}
     order_id = body.get("razorpay_order_id", "")
@@ -283,6 +322,23 @@ def verify_payment():
 
     if not verify_razorpay_signature(order_id, payment_id, signature):
         return jsonify({"error": "Payment verification failed"}), 400
+
+    if "life_profile" in body:
+        profile, err = _extract_life_profile()
+        if err:
+            msg, code = err
+            return jsonify({"error": msg}), code
+        analysis = analyze_life(profile)
+        narration = call_claude_life_narration(analysis)
+        analysis["mode"] = "life"
+        analysis["narration"] = narration or (
+            "We couldn't generate the written summary right now, but the "
+            "numbers above are complete. Your payment is safe — contact "
+            "support with your payment ID and we'll send the written "
+            "version directly."
+        )
+        analysis["disclaimer"] = LIFE_DISCLAIMER
+        return jsonify(analysis)
 
     if "situation_text" in body and not body.get("debts"):
         text, err = _extract_situation_text()
