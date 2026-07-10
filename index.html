@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
-  :root{
+:root{
     --cover-navy:#1B2A4A;
     --cover-navy-dark:#131F38;
     --paper:#F3EEDF;
@@ -374,6 +374,114 @@
     outline:2px solid var(--cover-navy);
     outline-offset:1px;
   }
+  .life-section-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--cover-navy);
+    margin:22px 0 10px;
+    padding-top:4px;
+    border-top:1px solid var(--paper-line);
+  }
+  .life-grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px 16px;
+  }
+  @media (max-width:640px){
+    .life-grid2{grid-template-columns:1fr;}
+  }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    padding-top:18px;
+  }
+  .checkbox-row label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    text-transform:none;
+    letter-spacing:normal;
+    font-weight:500;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .checkbox-row input[type="checkbox"]{
+    width:16px; height:16px;
+    accent-color:var(--cover-navy);
+    cursor:pointer;
+  }
+  .flag-list{margin-top:10px;}
+  .flag-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .flag-item .num{
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--cover-navy);
+    color:#EFE9D8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    flex-shrink:0;
+  }
+  .flag-item .name{font-weight:600; font-size:14px;}
+  .flag-item .detail{font-size:12px; color:var(--ink-soft);}
+
+  .faq-section, .disclaimer-section{
+    max-width:760px;
+    margin:0 auto 48px;
+    padding:0 20px;
+    color:#C7D0E0;
+  }
+  .faq-section h2, .disclaimer-section h2{
+    font-family:'Roboto Slab',serif;
+    color:#EFE9D8;
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  .faq-item{
+    background:rgba(255,255,255,0.04);
+    border:1px solid #3A4C70;
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  .faq-item summary{
+    padding:14px 18px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    color:#EFE9D8;
+    list-style:none;
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{
+    content:"+";
+    float:right;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .faq-item[open] summary::after{content:"−";}
+  .faq-item p{
+    padding:0 18px 16px;
+    margin:0;
+    font-size:13.5px;
+    line-height:1.6;
+    color:#B9C6DE;
+  }
+  .disclaimer-section p{
+    font-size:12.5px;
+    line-height:1.7;
+    color:#9FB0CC;
+  }
   .domain-tag{
     display:inline-block;
     font-family:'IBM Plex Mono',monospace;
@@ -440,6 +548,7 @@
 
       <div class="mode-toggle" id="modeToggle">
         <button class="mode-btn active" data-mode="debt">I can list my loans</button>
+        <button class="mode-btn" data-mode="life">My full money picture</button>
         <button class="mode-btn" data-mode="general">It's something else</button>
       </div>
 
@@ -459,6 +568,62 @@
         <div id="verdictSection" class="verdict hidden"></div>
       </div>
 
+      <div id="lifeMode" class="hidden">
+        <div class="field-row">
+          <label for="lifeIncome">Monthly household income (Rs)</label>
+          <input type="number" id="lifeIncome" placeholder="e.g. 35000" min="0">
+        </div>
+
+        <div class="life-section-title">Monthly expenses (Rs)</div>
+        <div class="field-row">
+          <div class="life-grid2">
+            <div><label for="expRent">Rent</label><input type="number" id="expRent" min="0" placeholder="0"></div>
+            <div><label for="expHomeLoan">Home loan EMI</label><input type="number" id="expHomeLoan" min="0" placeholder="0"></div>
+            <div><label for="expGrocery">Grocery</label><input type="number" id="expGrocery" min="0" placeholder="0"></div>
+            <div><label for="expMaid">Maid / house help</label><input type="number" id="expMaid" min="0" placeholder="0"></div>
+            <div><label for="expSchool">School / tuition fees</label><input type="number" id="expSchool" min="0" placeholder="0"></div>
+            <div><label for="expOtt">OTT / subscriptions</label><input type="number" id="expOtt" min="0" placeholder="0"></div>
+            <div><label for="expPetrol">Petrol / travel</label><input type="number" id="expPetrol" min="0" placeholder="0"></div>
+            <div><label for="expOutsideFood">Outside food / ordering in</label><input type="number" id="expOutsideFood" min="0" placeholder="0"></div>
+            <div><label for="expOther">Anything else regular</label><input type="number" id="expOther" min="0" placeholder="0"></div>
+            <div><label for="otherLoansEmi">Other loan EMIs (gold loan, personal loan, etc.)</label><input type="number" id="otherLoansEmi" min="0" placeholder="0"></div>
+          </div>
+        </div>
+
+        <div class="life-section-title">Credit card</div>
+        <div class="field-row">
+          <div class="life-grid2">
+            <div><label for="ccOutstanding">Current outstanding (Rs)</label><input type="number" id="ccOutstanding" min="0" placeholder="0"></div>
+            <div class="checkbox-row"><label><input type="checkbox" id="ccMinOnly"> I usually pay only the minimum due</label></div>
+          </div>
+        </div>
+
+        <div class="life-section-title">Insurance</div>
+        <div class="field-row">
+          <div class="life-grid2">
+            <div><label for="dependents">People depending on this income</label><input type="number" id="dependents" min="0" placeholder="0"></div>
+            <div></div>
+            <div class="checkbox-row"><label><input type="checkbox" id="hasHealth"> I have health insurance</label></div>
+            <div><label for="healthCover">Health cover amount (Rs, if any)</label><input type="number" id="healthCover" min="0" placeholder="0"></div>
+            <div class="checkbox-row"><label><input type="checkbox" id="hasTerm"> I have term life insurance</label></div>
+            <div><label for="termCover">Term cover amount (Rs, if any)</label><input type="number" id="termCover" min="0" placeholder="0"></div>
+          </div>
+        </div>
+
+        <div class="life-section-title">Savings &amp; investing</div>
+        <div class="field-row">
+          <div class="life-grid2">
+            <div><label for="emergencyFund">Money set aside for emergencies (Rs)</label><input type="number" id="emergencyFund" min="0" placeholder="0"></div>
+            <div><label for="monthlyInvestment">Current monthly SIP / mutual fund investment (Rs)</label><input type="number" id="monthlyInvestment" min="0" placeholder="0"></div>
+          </div>
+        </div>
+
+        <button class="primary-btn" id="previewLifeBtn">Show me my full picture</button>
+        <div class="error-msg hidden" id="errorMsgLife"></div>
+
+        <div id="verdictSectionLife" class="verdict hidden"></div>
+      </div>
+
       <div id="generalMode" class="hidden">
         <div class="field-row">
           <label for="situationText">What is going on? Insurance, tax notice, a loan you guaranteed for someone, a scam call -- write it in your own words.</label>
@@ -472,6 +637,39 @@
 
     </div>
   </div>
+</div>
+
+<div class="faq-section">
+  <h2 class="display">Frequently asked questions</h2>
+  <details class="faq-item">
+    <summary>Is this financial advice?</summary>
+    <p>No. Every report is general educational information based only on the numbers you enter — it isn't individualized investment advice (which in India requires a SEBI-registered investment adviser) or individualized insurance advice (which requires an IRDAI-licensed advisor or POS agent). We never recommend a specific lender, insurer, mutual fund, or policy.</p>
+  </details>
+  <details class="faq-item">
+    <summary>What happens to the numbers I enter?</summary>
+    <p>Your loan, expense, and insurance figures are used only to generate your report. Nothing is sold to lenders, insurers, or advertisers, and we don't call you afterward.</p>
+  </details>
+  <details class="faq-item">
+    <summary>How is the free preview different from the paid report?</summary>
+    <p>The free preview is a quick, on-device verdict — is your situation healthy, caution, high risk, or critical — with no payment or AI involved. The ₹199 report adds the full ranked breakdown (what to fix first and why) written out in plain language for your specific numbers.</p>
+  </details>
+  <details class="faq-item">
+    <summary>What if I'm not sure which mode to use?</summary>
+    <p>If you can list out your loans one by one, use "I can list my loans." If you want a full picture of your monthly income, expenses, insurance, and savings together, use "My full money picture." For anything else — a tax notice, an insurance claim dispute, a loan you guaranteed for someone — use "It's something else."</p>
+  </details>
+  <details class="faq-item">
+    <summary>What if the payment goes through but the report doesn't load?</summary>
+    <p>Your payment is safe either way. If a report ever fails to generate, note your payment ID from the Razorpay confirmation and contact support — the report will be sent to you directly.</p>
+  </details>
+  <details class="faq-item">
+    <summary>Do you store my payment details?</summary>
+    <p>No. Payments are handled entirely by Razorpay; this tool never sees or stores your card, UPI, or bank details.</p>
+  </details>
+</div>
+
+<div class="disclaimer-section">
+  <h2 class="display">Disclaimer</h2>
+  <p>Fix Your Finance is an independent, self-serve tool that turns numbers you enter into a plain-language summary. It is provided for general educational purposes only and does not constitute individualized financial, investment, insurance, tax, or legal advice. Reports may reference general rules of thumb (for example, typical emergency-fund or insurance-cover benchmarks) but never recommend a specific lender, insurer, mutual fund, policy, or product, and never guarantee any outcome or return. Figures and interest-rate assumptions used in reports (for example, typical credit-card revolving rates) are estimates for illustration and may not match your actual lender's or issuer's terms — always confirm exact terms directly with your bank, lender, or insurer. For advice tailored to your personal situation, consult a SEBI-registered investment adviser, an IRDAI-licensed insurance advisor, a chartered accountant, or a lawyer, as appropriate. Use of this tool and its reports is at your own discretion and risk.</p>
 </div>
 
 <footer>
@@ -552,6 +750,7 @@ addLoanRow(); addLoanRow();
 
 /* ---------- mode toggle: structured loans vs. free-text situation ---------- */
 const debtModeEl = document.getElementById("debtMode");
+const lifeModeEl = document.getElementById("lifeMode");
 const generalModeEl = document.getElementById("generalMode");
 document.getElementById("modeToggle").addEventListener("click", (e)=>{
   if(!e.target.classList.contains("mode-btn")) return;
@@ -559,6 +758,7 @@ document.getElementById("modeToggle").addEventListener("click", (e)=>{
   e.target.classList.add("active");
   const mode = e.target.dataset.mode;
   debtModeEl.classList.toggle("hidden", mode !== "debt");
+  lifeModeEl.classList.toggle("hidden", mode !== "life");
   generalModeEl.classList.toggle("hidden", mode !== "general");
 });
 
@@ -787,6 +987,226 @@ function renderFullReport(data){
     <div class="narration">${data.narration}</div>
     <div style="font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:8px;">Pay off in this order</div>
     ${tabsHtml}
+  `;
+}
+
+/* =====================================================================
+   Life mode: full monthly money picture (income, expenses, credit card,
+   insurance gaps, emergency fund, investing). Mirrors debt-mode's
+   pattern: an instant local-only deterministic preview, then payment,
+   then verify-payment triggers the real deterministic breakdown +
+   Claude narration on the backend (see life_engine.py).
+   ===================================================================== */
+
+const EXPENSE_FIELD_IDS = {
+  rent:"expRent", home_loan_emi:"expHomeLoan", grocery:"expGrocery",
+  maid:"expMaid", school_fees:"expSchool", ott_subscriptions:"expOtt",
+  petrol_travel:"expPetrol", outside_food:"expOutsideFood", other:"expOther",
+};
+
+function collectLifeProfile(){
+  const val = id => parseFloat(document.getElementById(id).value) || 0;
+  const expenses = {};
+  Object.entries(EXPENSE_FIELD_IDS).forEach(([key, id]) => { expenses[key] = val(id); });
+  return {
+    monthly_income: val("lifeIncome"),
+    expenses,
+    other_loans_emi: val("otherLoansEmi"),
+    credit_card: {
+      outstanding: val("ccOutstanding"),
+      pays_minimum_only: document.getElementById("ccMinOnly").checked,
+    },
+    dependents_count: val("dependents"),
+    has_health_insurance: document.getElementById("hasHealth").checked,
+    health_insurance_cover: val("healthCover"),
+    has_term_insurance: document.getElementById("hasTerm").checked,
+    term_insurance_cover: val("termCover"),
+    emergency_fund: val("emergencyFund"),
+    monthly_investment: val("monthlyInvestment"),
+  };
+}
+
+/* client-side mirror of life_engine.py's free_preview_life, for an
+   instant preview -- kept deliberately simple; the real ranked list of
+   priorities only appears in the paid report from the backend. */
+function localPreviewLife(p){
+  const totalExpenses = Object.values(p.expenses).reduce((s,v)=>s+v,0);
+  const totalOutflow = totalExpenses + p.other_loans_emi;
+  const surplus = p.monthly_income - totalOutflow;
+  const expenseRatioPct = p.monthly_income>0 ? Math.round((totalOutflow/p.monthly_income)*1000)/10 : null;
+
+  let gapCount = 0;
+  if(surplus < 0) gapCount++;
+  if(p.credit_card.pays_minimum_only && p.credit_card.outstanding > 0) gapCount++;
+  if(!p.has_health_insurance) gapCount++;
+  if(p.dependents_count > 0 && !p.has_term_insurance) gapCount++;
+  const monthsCovered = totalOutflow>0 ? p.emergency_fund/totalOutflow : null;
+  if(monthsCovered !== null && monthsCovered < 3) gapCount++;
+  if(surplus > 0 && p.monthly_investment <= 0) gapCount++;
+
+  let level;
+  if(surplus < 0 || (p.credit_card.pays_minimum_only && p.credit_card.outstanding>0) || !p.has_health_insurance || (p.dependents_count>0 && !p.has_term_insurance)) level="critical";
+  else if((expenseRatioPct||0) > 80 || (monthsCovered!==null && monthsCovered<1)) level="high";
+  else if((expenseRatioPct||0) > 60 || (monthsCovered!==null && monthsCovered<3) || (surplus>0 && p.monthly_investment<=0)) level="caution";
+  else level="healthy";
+
+  return {level, totalOutflow, surplus, expenseRatioPct, gapCount};
+}
+
+const LIFE_STAMP_TEXT = {
+  healthy:{big:"Healthy", small:"On track"},
+  caution:{big:"Caution", small:"A few gaps"},
+  high:{big:"High risk", small:"Action needed"},
+  critical:{big:"Critical", small:"Act now"},
+};
+const LIFE_HEADLINES = {
+  healthy:"The month adds up with room to spare, and the basics — insurance, an emergency fund, investing — are in place.",
+  caution:"The month mostly works, but there are a few gaps worth closing before they become bigger problems.",
+  high:"Most of what comes in is already spoken for, or an important safety net is missing.",
+  critical:"At least one urgent gap needs attention now — either spending is more than income, a credit card is revolving, or a core insurance protection is missing.",
+};
+
+let lastLifeProfile = null;
+
+document.getElementById("previewLifeBtn").addEventListener("click", ()=>{
+  const errEl = document.getElementById("errorMsgLife");
+  errEl.classList.add("hidden");
+  const profile = collectLifeProfile();
+  if(profile.monthly_income <= 0){
+    errEl.textContent = "Enter your monthly household income first.";
+    errEl.classList.remove("hidden");
+    return;
+  }
+  lastLifeProfile = profile;
+  const result = localPreviewLife(profile);
+  renderVerdictLife(result);
+});
+
+function renderVerdictLife(result){
+  const el = document.getElementById("verdictSectionLife");
+  el.classList.remove("hidden");
+  const stamp = LIFE_STAMP_TEXT[result.level];
+  el.innerHTML = `
+    <div class="verdict-summary">
+      <div class="stamp ${result.level}">
+        <div class="big">${stamp.big}</div>
+        <div class="small">${stamp.small}</div>
+      </div>
+      <div class="headline">${LIFE_HEADLINES[result.level]}</div>
+    </div>
+    <div class="ledger-line header">
+      <div>Item</div><div class="amt">Amount</div><div class="amt">%</div>
+    </div>
+    <div class="ledger-line">
+      <div>Total monthly outflow</div><div class="amt">₹${result.totalOutflow.toLocaleString('en-IN')}</div><div class="amt">${result.expenseRatioPct===null?'—':result.expenseRatioPct+'% of income'}</div>
+    </div>
+    <div class="ledger-line">
+      <div>${result.surplus>=0?'Surplus':'Deficit'}</div><div class="amt">₹${Math.abs(result.surplus).toLocaleString('en-IN')}</div><div class="amt">—</div>
+    </div>
+    <div class="ledger-line">
+      <div>Gaps found</div><div class="amt">${result.gapCount}</div><div class="amt flag">${result.gapCount>0?'⚠':'—'}</div>
+    </div>
+
+    <div class="locked-section" id="lockedSectionLife">
+      <div class="lock-icon">🔒</div>
+      <p>The full report ranks every gap in the order to fix it, explains why, and gives a plain-language summary written for your numbers specifically.</p>
+      <div class="price-tag">₹199</div>
+      <button class="primary-btn" id="unlockBtnLife" style="max-width:280px;">Unlock full report</button>
+    </div>
+    <div id="fullReportLife" class="full-report hidden"></div>
+  `;
+  document.getElementById("unlockBtnLife").addEventListener("click", startPaymentLife);
+}
+
+async function startPaymentLife(){
+  const btn = document.getElementById("unlockBtnLife");
+  const currentProfile = collectLifeProfile();
+  if(currentProfile.monthly_income <= 0){
+    alert("Your income looks incomplete. Please re-check the form before paying.");
+    return;
+  }
+  lastLifeProfile = currentProfile;
+
+  btn.disabled = true;
+  btn.textContent = "Preparing payment…";
+  try{
+    const orderRes = await fetch(`${API_BASE}/api/create-order`, {method:"POST"});
+    const order = await orderRes.json();
+    if(!order.order_id){
+      throw new Error(order.error || "Could not start payment");
+    }
+    const rzp = new Razorpay({
+      key: order.key_id,
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.order_id,
+      name: "Fix Your Finance",
+      description: "Full money picture — full report",
+      handler: async function(response){
+        await verifyAndFetchReportLife(response, order.order_id);
+      },
+      modal:{
+        ondismiss: function(){
+          btn.disabled = false;
+          btn.textContent = "Unlock full report";
+        }
+      },
+      theme:{ color:"#1B2A4A" }
+    });
+    rzp.open();
+  }catch(e){
+    btn.disabled = false;
+    btn.textContent = "Unlock full report";
+    alert("Something went wrong starting payment: " + e.message);
+  }
+}
+
+async function verifyAndFetchReportLife(paymentResponse, orderId){
+  const lockedSection = document.getElementById("lockedSectionLife");
+  lockedSection.innerHTML = `<p>Verifying payment and building your full report…</p>`;
+  try{
+    const res = await fetch(`${API_BASE}/api/verify-payment`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        razorpay_order_id: orderId,
+        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+        razorpay_signature: paymentResponse.razorpay_signature,
+        life_profile: lastLifeProfile,
+      })
+    });
+    const data = await res.json();
+    if(data.error){
+      lockedSection.innerHTML = `<p style="color:var(--danger)">Payment verification failed: ${data.error}. If money was deducted, it will be auto-refunded within 5-7 days — contact support with your payment ID: ${paymentResponse.razorpay_payment_id}</p>`;
+      return;
+    }
+    lockedSection.classList.add("hidden");
+    renderFullReportLife(data);
+  }catch(e){
+    lockedSection.innerHTML = `<p style="color:var(--danger)">Could not load your report. Payment ID: ${paymentResponse.razorpay_payment_id}. Contact support and we'll send it directly.</p>`;
+  }
+}
+
+function renderFullReportLife(data){
+  const el = document.getElementById("fullReportLife");
+  el.classList.remove("hidden");
+  const priorities = data.priorities || [];
+  const flagsHtml = priorities.map(p=>`
+    <div class="flag-item">
+      <div class="num">${p.rank}</div>
+      <div style="flex:1">
+        <div class="name">${p.title}</div>
+        <div class="detail">${p.detail}</div>
+      </div>
+    </div>`).join("");
+  const disclaimerHtml = data.disclaimer
+    ? `<div class="report-disclaimer">${data.disclaimer}</div>`
+    : "";
+  el.innerHTML = `
+    <div class="narration">${data.narration}</div>
+    <div style="font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:8px;">Priority order</div>
+    <div class="flag-list">${flagsHtml}</div>
+    ${disclaimerHtml}
   `;
 }
 
