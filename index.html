@@ -523,6 +523,25 @@
     padding:0 20px 40px;
   }
   footer a{color:#9FB0CC;}
+
+  /* ---------- Mobile fixes ---------- */
+  @media (max-width:640px){
+    .cover{padding:44px 18px 72px;}
+    .passbook-wrap{margin:-40px auto 60px; padding:0 12px;}
+    .passbook::before{width:18px;}
+    .passbook-header{padding:16px 16px 16px 30px;}
+    .passbook-body{padding:24px 16px 24px 30px;}
+    .loan-entry{padding:16px 14px 4px;}
+    .ledger-line{
+      grid-template-columns:1fr;
+      gap:2px;
+      padding:10px 0;
+    }
+    .ledger-line.header{display:none;}
+    .ledger-line .amt{text-align:left;}
+    .ledger-line > div:first-child{font-weight:600; font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em;}
+    .stamp{width:112px; height:112px;}
+  }
 </style>
 </head>
 <body>
