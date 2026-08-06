@@ -321,10 +321,15 @@ Priorities already worked out, in order (do not re-rank these, just explain them
 
 {LIFE_GUARDRAIL_BLOCK}
 
-Write a short report (180-260 words), no headers, plain paragraphs:
+Write a report, no headers, plain paragraphs:
 1. One or two sentences stating plainly where the month stands overall (surplus/deficit, and
    the single biggest thing pulling on the budget).
 2. Walk through the priorities above in the given order, in flowing prose (not a bare list),
    explaining briefly *why* each one matters in that order.
 3. Close with one practical, concrete next action for this week -- something small and doable,
-   not another lecture."""
+   not another lecture.
+
+Aim for around 180-320 words as a natural guide, not a hard ceiling -- if this household's
+situation has several priorities to walk through, give each one enough room to actually explain
+rather than compressing to fit a word count. Never end mid-sentence -- if running long, tighten
+earlier paragraphs rather than leaving the closing action unfinished."""

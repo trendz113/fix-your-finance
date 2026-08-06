@@ -175,6 +175,19 @@ Also:
 
 def build_general_prompt(situation_text: str, domain: str) -> str:
     domain_label = DOMAIN_LABELS.get(domain, "General financial question")
+    debt_specific_instruction = ""
+    if domain == "debt":
+        debt_specific_instruction = """
+Since this is a debt/repayment situation, your next-actions list must go beyond
+"contact your lender" -- give an actual order of attack: which category of debt
+to approach first (typically highest-interest unsecured debt -- credit cards and
+loan apps -- before secured/lower-rate loans), and if what they described shows
+EMIs exceeding or close to their income, name that cash-flow gap explicitly as
+the first thing to fix (restructuring for lower EMI/longer tenure) before
+anything about the total outstanding amount -- the total is not the urgent
+problem, the monthly gap is. Be concrete about what "closing this out" actually
+looks like step by step, not just "talk to your lender.\""""
+
     return f"""You are helping someone in tier-2/rural India who is dealing with a financial
 problem and may be stressed or unsure who to ask. Use plain, direct language,
 no jargon left unexplained.
@@ -186,16 +199,27 @@ Here is what they told you, in their own words:
 
 {GUARDRAIL_BLOCK}
 
-Write a short report (180-260 words), no headers, plain paragraphs, covering:
+Write a report, plain paragraphs (no markdown headers), covering:
 1. One or two sentences reflecting back what's actually going on, in plain
    terms -- so they know they've been understood correctly.
 2. What generally applies here and why -- state the actual legal/regulatory
    principle specifically and confidently if it's Category 1 (see above);
    flag clearly anything that depends on their specific documents (Category 2).
-3. A short, concrete list of 2-4 next actions, in the order they should be
-   done, including who to contact or what to check if that's the right next
-   step (e.g. "ask your insurer for X", "check clause Y in your policy",
-   "consult a CA before filing", "raise this with your lender in writing").
+3. A concrete, numbered list of next actions, in the order they should be
+   done, including who to contact or what to check at each step (e.g. "ask
+   your insurer for X", "check clause Y in your policy", "consult a CA
+   before filing", "raise this with your lender in writing"). Give this list
+   as much room as the situation actually needs -- a simple question can stay
+   short, but a genuinely complex situation (multiple debts, several
+   institutions, more than one legal issue at once) deserves a fuller list
+   rather than being compressed to fit an arbitrary word count.
+{debt_specific_instruction}
+
+Aim for around 250-450 words as a natural guide, not a hard ceiling -- err on
+the side of a complete, unrushed numbered action list over hitting a specific
+word count. Every numbered step must be a complete sentence -- never end the
+report mid-sentence or mid-list; if you're running long, tighten earlier
+paragraphs rather than leaving the last action item unfinished.
 
 End with the list of next actions as the very last thing you write -- do not
 add your own closing disclaimer or caveat about this not being professional

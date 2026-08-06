@@ -172,27 +172,30 @@ Loans in the order they should be tackled:
 
 {DEBT_GUARDRAIL_BLOCK}
 
-Write a short report (150-220 words) with three parts, no headers, plain paragraphs:
+Write a report with three parts, no headers, plain paragraphs:
 1. One sentence stating plainly where they stand right now. If a debt-spiral pattern was
    detected, name it plainly (one loan is likely covering another) without shaming them.
 2. What to do FIRST and why (call out any underwater loan by name explicitly if present —
    this needs to be renegotiated or refinanced, not just paid the minimum).
-3. The order to clear the rest, in one or two sentences."""
+3. The order to clear the rest, in one or two sentences.
+
+Aim for around 150-260 words as a natural guide, not a hard ceiling. Never end mid-sentence --
+if running long, tighten part 1 rather than leaving part 3 unfinished."""
 
 
 def call_claude_debt_narration(analysis: dict) -> str:
     prompt = build_debt_narration_prompt(analysis)
-    return call_claude(prompt, max_tokens=500)
+    return call_claude(prompt, max_tokens=650)
 
 
 def call_claude_general_report(situation_text: str, domain: str) -> str:
     prompt = build_general_prompt(situation_text, domain)
-    return call_claude(prompt, max_tokens=550)
+    return call_claude(prompt, max_tokens=1000)
 
 
 def call_claude_life_narration(analysis: dict) -> str:
     prompt = build_life_narration_prompt(analysis)
-    return call_claude(prompt, max_tokens=700)
+    return call_claude(prompt, max_tokens=900)
 
 
 def _extract_debts_and_income():
