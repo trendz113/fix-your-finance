@@ -208,18 +208,20 @@ Write a report, plain paragraphs (no markdown headers), covering:
 3. A concrete, numbered list of next actions, in the order they should be
    done, including who to contact or what to check at each step (e.g. "ask
    your insurer for X", "check clause Y in your policy", "consult a CA
-   before filing", "raise this with your lender in writing"). Give this list
-   as much room as the situation actually needs -- a simple question can stay
-   short, but a genuinely complex situation (multiple debts, several
-   institutions, more than one legal issue at once) deserves a fuller list
-   rather than being compressed to fit an arbitrary word count.
+   before filing", "raise this with your lender in writing"). Use AT MOST
+   6 numbered steps, no matter how complex the situation -- if there's more
+   ground to cover than that, group related actions into one step rather
+   than adding a 7th, 8th, etc. Keep each step to 1-2 sentences -- concrete
+   and specific, but not a paragraph.
 {debt_specific_instruction}
 
-Aim for around 250-450 words as a natural guide, not a hard ceiling -- err on
-the side of a complete, unrushed numbered action list over hitting a specific
-word count. Every numbered step must be a complete sentence -- never end the
-report mid-sentence or mid-list; if you're running long, tighten earlier
-paragraphs rather than leaving the last action item unfinished.
+Aim for around 250-420 words as a natural guide. The 6-step cap on the
+action list is a hard limit -- everything else (paragraphs 1 and 2) should
+flex to fit the space remaining, not the other way around. Every numbered
+step must be a complete sentence -- never end the report mid-sentence or
+mid-list; if you're running long, tighten earlier paragraphs and shorten
+individual steps rather than leaving the last action item unfinished or
+adding more steps than the cap allows.
 
 End with the list of next actions as the very last thing you write -- do not
 add your own closing disclaimer or caveat about this not being professional

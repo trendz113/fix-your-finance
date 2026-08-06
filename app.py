@@ -109,6 +109,24 @@ def verify_razorpay_signature(order_id: str, payment_id: str, signature: str) ->
     return hmac.compare_digest(expected, signature)
 
 
+def _trim_to_last_complete_sentence(text: str) -> str:
+    """Used only when the API tells us a response was cut off by the token
+    limit. Rather than show a paying customer a mid-word/mid-sentence
+    fragment (which happened twice in production), cut back to the last
+    sentence-ending punctuation so what they see always reads as complete,
+    even if it's missing the very last point."""
+    for stop_char in (".", "!", "?"):
+        idx = text.rfind(stop_char)
+        if idx != -1:
+            candidate = text[:idx + 1]
+            # Only use this trim if we're not throwing away most of the
+            # report -- if the model front-loaded one giant paragraph, a
+            # blind trim to the last period could cut too much.
+            if len(candidate) >= len(text) * 0.5:
+                return candidate
+    return text  # nothing better to do -- return as-is rather than blank it
+
+
 def call_claude(prompt: str, max_tokens: int = 600) -> str:
     """Single-purpose Claude call: one user turn, no system prompt needed
     since every prompt builder below already frames the task fully.
@@ -140,6 +158,18 @@ def call_claude(prompt: str, max_tokens: int = 600) -> str:
         text = "".join(text_parts).strip()
         if not text:
             print(f"[call_claude] FAILED: got status 200 but no text content. Full response: {resp}")
+        elif resp.get("stop_reason") == "max_tokens":
+            # Anthropic tells us explicitly when a response was cut off by
+            # the token limit rather than finishing naturally -- this is
+            # what caused the mid-sentence truncation seen in production
+            # (twice, even after raising the limit once). Log it loudly so
+            # it's caught immediately instead of relying on a user pasting
+            # the broken output back, AND trim what's shown to the paying
+            # customer so they never see a dangling mid-word fragment.
+            print(f"[call_claude] WARNING: response TRUNCATED by max_tokens={max_tokens}. "
+                  f"Consider raising max_tokens further or tightening the prompt's length "
+                  f"instructions. Truncated text ended with: ...{text[-120:]!r}")
+            text = _trim_to_last_complete_sentence(text)
         return text
     except (KeyError, IndexError, TypeError) as e:
         print(f"[call_claude] FAILED: could not parse response ({type(e).__name__}: {e}). Full response: {resp}")
@@ -206,7 +236,7 @@ def call_claude_debt_narration(analysis: dict) -> str:
 
 def call_claude_general_report(situation_text: str, domain: str) -> str:
     prompt = build_general_prompt(situation_text, domain)
-    return call_claude(prompt, max_tokens=1000)
+    return call_claude(prompt, max_tokens=1600)
 
 
 def call_claude_life_narration(analysis: dict) -> str:
