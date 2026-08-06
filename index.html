@@ -903,10 +903,12 @@ function renderVerdict(result){
       <p>The full passbook shows the exact order to pay off each loan, how many months each one really takes, and a plain-language explainer written for your numbers specifically.</p>
       <div class="price-tag">₹199</div>
       <button class="primary-btn" id="unlockBtn" style="max-width:280px;">Unlock full passbook</button>
+      ${promoWidgetHtml('debt')}
     </div>
     <div id="fullReport" class="full-report hidden"></div>
   `;
   document.getElementById("unlockBtn").addEventListener("click", startPayment);
+  wirePromoWidget('debt');
 }
 
 async function startPayment(){
@@ -1131,10 +1133,12 @@ function renderVerdictLife(result){
       <p>The full report ranks every gap in the order to fix it, explains why, and gives a plain-language summary written for your numbers specifically.</p>
       <div class="price-tag">₹199</div>
       <button class="primary-btn" id="unlockBtnLife" style="max-width:280px;">Unlock full report</button>
+      ${promoWidgetHtml('life')}
     </div>
     <div id="fullReportLife" class="full-report hidden"></div>
   `;
   document.getElementById("unlockBtnLife").addEventListener("click", startPaymentLife);
+  wirePromoWidget('life');
 }
 
 async function startPaymentLife(){
@@ -1284,10 +1288,12 @@ function renderVerdictText(result){
       <p>The full report reads your situation in detail and gives you plain-language guidance written for what you described, plus concrete next steps.</p>
       <div class="price-tag">₹199</div>
       <button class="primary-btn" id="unlockBtnText" style="max-width:280px;">Unlock full report</button>
+      ${promoWidgetHtml('general')}
     </div>
     <div id="fullReportText" class="full-report hidden"></div>
   `;
   document.getElementById("unlockBtnText").addEventListener("click", startPaymentGeneral);
+  wirePromoWidget('general');
 }
 
 async function startPaymentGeneral(){
@@ -1366,6 +1372,80 @@ function renderFullReportGeneral(data){
     ? `<div class="report-disclaimer">${data.disclaimer}</div>`
     : "";
   el.innerHTML = `<div class="general-report">${data.report}</div>${disclaimerHtml}`;
+}
+
+// ── PROMO CODE (testing bypass) ──────────────────────────
+// Skips Razorpay entirely and calls /api/verify-payment with just a
+// promo_code, matching PROMO_BYPASS_CODE on the backend. Shared across
+// all three modes (debt / life / general) since they all unlock the
+// same way once payment is verified.
+function promoWidgetHtml(mode){
+  return `
+    <div style="margin-top:14px;">
+      <span class="promo-toggle" style="font-size:12px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;" onclick="document.getElementById('promoRow_${mode}').style.display='flex'; this.style.display='none';">Have a promo code?</span>
+      <div id="promoRow_${mode}" style="display:none;gap:8px;margin-top:8px;justify-content:center;">
+        <input type="text" id="promoInput_${mode}" placeholder="Promo code" style="padding:9px 12px;border:1px solid #c7c0ae;border-radius:3px;font-size:14px;">
+        <button class="primary-btn" id="promoBtn_${mode}" style="max-width:120px;padding:9px 16px;">Apply</button>
+      </div>
+      <div id="promoErr_${mode}" style="display:none;color:var(--danger);font-size:12.5px;margin-top:8px;"></div>
+    </div>
+  `;
+}
+
+function wirePromoWidget(mode){
+  const btn = document.getElementById(`promoBtn_${mode}`);
+  if(!btn) return;
+  btn.addEventListener("click", () => unlockWithPromo(mode));
+}
+
+async function unlockWithPromo(mode){
+  const code = document.getElementById(`promoInput_${mode}`).value.trim();
+  const errBox = document.getElementById(`promoErr_${mode}`);
+  errBox.style.display = "none";
+  if(!code) return;
+
+  const btn = document.getElementById(`promoBtn_${mode}`);
+  btn.disabled = true;
+  btn.textContent = "Checking…";
+
+  const bodyByMode = {
+    debt: { promo_code: code, debts: lastDebts, monthly_income: lastIncome },
+    life: { promo_code: code, life_profile: lastLifeProfile },
+    general: { promo_code: code, situation_text: lastSituationText }
+  };
+  const lockedSectionIdByMode = {
+    debt: "lockedSection",
+    life: "lockedSectionLife",
+    general: "lockedSectionText"
+  };
+  const renderByMode = {
+    debt: renderFullReport,
+    life: renderFullReportLife,
+    general: renderFullReportGeneral
+  };
+
+  try{
+    const res = await fetch(`${API_BASE}/api/verify-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bodyByMode[mode])
+    });
+    const data = await res.json();
+    if(data.error){
+      errBox.textContent = data.error;
+      errBox.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Apply";
+      return;
+    }
+    document.getElementById(lockedSectionIdByMode[mode]).classList.add("hidden");
+    renderByMode[mode](data);
+  }catch(e){
+    errBox.textContent = "Something went wrong: " + e.message;
+    errBox.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Apply";
+  }
 }
 </script>
 

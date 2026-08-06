@@ -60,6 +60,7 @@ RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
 REPORT_PRICE_PAISE = int(os.environ.get("REPORT_PRICE_PAISE", "19900"))  # default ₹199
+PROMO_BYPASS_CODE = os.environ.get("PROMO_BYPASS_CODE", "SALARYBIT-TEST")
 
 RAZORPAY_ORDERS_URL = "https://api.razorpay.com/v1/orders"
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
@@ -316,12 +317,16 @@ def verify_payment():
     order_id = body.get("razorpay_order_id", "")
     payment_id = body.get("razorpay_payment_id", "")
     signature = body.get("razorpay_signature", "")
+    promo_code = (body.get("promo_code") or "").strip()
 
-    if not all([order_id, payment_id, signature]):
-        return jsonify({"error": "Missing payment verification fields"}), 400
+    if promo_code and promo_code == PROMO_BYPASS_CODE:
+        print("[fix-your-finance] PROMO bypass unlock | code used")
+    else:
+        if not all([order_id, payment_id, signature]):
+            return jsonify({"error": "Missing payment verification fields"}), 400
 
-    if not verify_razorpay_signature(order_id, payment_id, signature):
-        return jsonify({"error": "Payment verification failed"}), 400
+        if not verify_razorpay_signature(order_id, payment_id, signature):
+            return jsonify({"error": "Payment verification failed"}), 400
 
     if "life_profile" in body:
         profile, err = _extract_life_profile()
