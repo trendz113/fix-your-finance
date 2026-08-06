@@ -92,6 +92,13 @@ def _post_json(url, payload, headers):
         except json.JSONDecodeError:
             parsed = {"raw": body}
         return e.code, parsed
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        # Network-level failure (DNS, timeout, connection refused) -- these
+        # don't raise HTTPError, and previously weren't caught at all here,
+        # meaning they'd propagate as an unhandled exception. Return a
+        # synthetic non-200 status instead so callers can log and handle
+        # this the same way as any other API failure.
+        return 0, {"raw": f"{type(e).__name__}: {e}"}
 
 
 def verify_razorpay_signature(order_id: str, payment_id: str, signature: str) -> bool:
@@ -106,8 +113,12 @@ def call_claude(prompt: str, max_tokens: int = 600) -> str:
     """Single-purpose Claude call: one user turn, no system prompt needed
     since every prompt builder below already frames the task fully.
     Returns "" on any failure so callers can fall back to a safe default
-    message instead of crashing the report."""
+    message instead of crashing the report. Every failure path is logged
+    -- previously this function failed completely silently, which is why
+    a failed report showed nothing in the logs except the payment unlock
+    line right before it."""
     if not ANTHROPIC_API_KEY:
+        print("[call_claude] FAILED: ANTHROPIC_API_KEY is not set on this service")
         return ""
     payload = {
         "model": CLAUDE_MODEL,
@@ -121,12 +132,17 @@ def call_claude(prompt: str, max_tokens: int = 600) -> str:
     }
     status, resp = _post_json(ANTHROPIC_URL, payload, headers)
     if status != 200:
+        print(f"[call_claude] FAILED: status={status} model={CLAUDE_MODEL} response={resp}")
         return ""
     try:
         blocks = resp.get("content", [])
         text_parts = [b["text"] for b in blocks if b.get("type") == "text"]
-        return "".join(text_parts).strip()
-    except (KeyError, IndexError, TypeError):
+        text = "".join(text_parts).strip()
+        if not text:
+            print(f"[call_claude] FAILED: got status 200 but no text content. Full response: {resp}")
+        return text
+    except (KeyError, IndexError, TypeError) as e:
+        print(f"[call_claude] FAILED: could not parse response ({type(e).__name__}: {e}). Full response: {resp}")
         return ""
 
 
